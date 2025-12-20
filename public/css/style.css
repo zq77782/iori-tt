@@ -1,4 +1,9 @@
 /* 自定义滚动条 */
+:root {
+  --card-padding: 1.25rem; /* 20px, default p-5 */
+  --card-radius: 0.75rem;  /* 12px, default rounded-xl */
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -22,6 +27,11 @@
 .site-card {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   will-change: transform;
+  border-radius: var(--card-radius);
+}
+
+.site-card-content {
+  padding: var(--card-padding);
 }
 
 .site-card:hover {
@@ -198,6 +208,7 @@
   -webkit-backdrop-filter: blur(var(--frosted-glass-blur, 15px)) !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+  /* border-radius already set by site-card */
 }
 
 .frosted-glass-effect:hover {
@@ -224,7 +235,7 @@
 }
 
 @media (max-width: 410px) {
-  .site-card .p-5 {
+  .site-card .site-card-content {
     padding: 0.75rem !important;
   }
 

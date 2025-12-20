@@ -171,6 +171,8 @@ export async function onRequest(context) {
   let layoutEnableBgBlur = false;
   let layoutBgBlurIntensity = '0';
   let layoutCardStyle = 'style1';
+  let layoutCardPadding = '20';
+  let layoutCardBorderRadius = '12';
   let wallpaperSource = 'bing';
   let wallpaperCid360 = '36';
 
@@ -186,6 +188,7 @@ export async function onRequest(context) {
         'layout_random_wallpaper', 'bing_country',
         'layout_enable_frosted_glass', 'layout_frosted_glass_intensity',
         'layout_enable_bg_blur', 'layout_bg_blur_intensity', 'layout_card_style',
+        'layout_card_padding', 'layout_card_border_radius',
         'wallpaper_source', 'wallpaper_cid_360'
     ];
     const placeholders = keys.map(() => '?').join(',');
@@ -225,6 +228,8 @@ export async function onRequest(context) {
         if (row.key === 'layout_enable_bg_blur') layoutEnableBgBlur = row.value === 'true';
         if (row.key === 'layout_bg_blur_intensity') layoutBgBlurIntensity = row.value;
         if (row.key === 'layout_card_style') layoutCardStyle = row.value;
+        if (row.key === 'layout_card_padding') layoutCardPadding = row.value;
+        if (row.key === 'layout_card_border_radius') layoutCardBorderRadius = row.value;
         if (row.key === 'wallpaper_source') wallpaperSource = row.value;
         if (row.key === 'wallpaper_cid_360') wallpaperCid360 = row.value;
       });
@@ -429,12 +434,12 @@ export async function onRequest(context) {
     const frostedClass = layoutEnableFrostedGlass ? 'frosted-glass-effect' : '';
     const cardStyleClass = layoutCardStyle === 'style2' ? 'style-2' : '';
     const baseCardClass = layoutEnableFrostedGlass 
-        ? 'site-card group rounded-xl overflow-hidden transition-all' 
-        : 'site-card group bg-white border border-primary-100/60 rounded-xl shadow-sm overflow-hidden';
+        ? 'site-card group overflow-hidden transition-all' 
+        : 'site-card group bg-white border border-primary-100/60 shadow-sm overflow-hidden';
 
     return `
       <div class="${baseCardClass} ${frostedClass} ${cardStyleClass}" data-id="${site.id}" data-name="${escapeHTML(site.name)}" data-url="${escapeHTML(normalizedUrl)}" data-catalog="${escapeHTML(site.catelog)}">
-        <div class="p-5">
+        <div class="site-card-content">
           <a href="${escapeHTML(normalizedUrl || '#')}" ${hasValidUrl ? 'target="_blank" rel="noopener noreferrer"' : ''} class="block">
             <div class="flex items-start">
               <div class="site-icon flex-shrink-0 mr-4 transition-all duration-300">
@@ -645,6 +650,10 @@ export async function onRequest(context) {
       const cssVarInjection = `<style>:root { --frosted-glass-blur: ${layoutFrostedGlassIntensity}px; }</style>`;
       html = html.replace('</head>', `${cssVarInjection}</head>`);
   }
+
+  // Inject Card CSS Variables
+  const cardCssVars = `<style>:root { --card-padding: ${layoutCardPadding}px; --card-radius: ${layoutCardBorderRadius}px; }</style>`;
+  html = html.replace('</head>', `${cardCssVars}</head>`);
 
   // Inject Layout Config for Client-side JS
   const layoutConfigScript = `

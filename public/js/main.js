@@ -578,8 +578,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const frostedClass = isFrostedEnabled ? 'frosted-glass-effect' : '';
         const cardStyleClass = cardStyle === 'style2' ? 'style-2' : '';
         const baseCardClass = isFrostedEnabled
-            ? 'site-card group rounded-xl overflow-hidden transition-all' 
-            : 'site-card group bg-white border border-primary-100/60 rounded-xl shadow-sm overflow-hidden';
+            ? 'site-card group overflow-hidden transition-all' 
+            : 'site-card group bg-white border border-primary-100/60 shadow-sm overflow-hidden';
         
         const card = document.createElement('div');
         card.className = `${baseCardClass} ${frostedClass} ${cardStyleClass} card-anim-enter`;
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
         card.setAttribute('data-catalog', safeCatalog);
         
         card.innerHTML = `
-        <div class="p-5">
+        <div class="site-card-content">
           <a href="${safeUrl}" ${hasValidUrl ? 'target="_blank" rel="noopener noreferrer"' : ''} class="block">
             <div class="flex items-start">
               <div class="site-icon flex-shrink-0 mr-4 transition-all duration-300">
