@@ -35,25 +35,26 @@ export async function onRequest(context) {
     if (!(await isAdminAuthenticated(request, env))) {
       return errorResponse('Unauthorized', 401);
     }
-
+  
     try {
       const body = await request.json();
       const newShortcut = body.sidebar_shortcut?.trim();
-
-      if (!newShortcut || newShortcut.length === 0) {
-        return errorResponse('无效快捷键值', 400);
+  
+      // 修改校验：允许单个字符或短字符串（例如 "C" 或 "Ctrl+K"）
+      if (!newShortcut || newShortcut.length < 1 || newShortcut.length > 10) {
+        return errorResponse('快捷键值无效（1-10个字符）', 400);
       }
-
-      // 写入 KV（主存储）
+  
+      // 写入 KV
       await env.kj.put('sidebar_shortcut', newShortcut);
-
-      // 可选：同时写入 D1 作为备份（如果您想保留 D1 记录）
+  
+      // 可选备份到 D1
       await env.NAV_DB.prepare(
         'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)'
       )
         .bind('sidebar_shortcut', newShortcut)
         .run();
-
+  
       return jsonResponse({
         code: 200,
         message: '快捷键已保存',
@@ -64,6 +65,3 @@ export async function onRequest(context) {
       return errorResponse(`保存失败：${e.message}`, 500);
     }
   }
-
-  return errorResponse('Method Not Allowed', 405);
-}
