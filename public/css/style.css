@@ -552,10 +552,37 @@ header {
   overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word;
 }
 
-#sidebar-toggle { display: none; }
+/* 隐藏 checkbox 本身 */
+#sidebar-toggle {
+  display: none;
+}
+
+/* 侧边栏默认收起状态：向左平移自身宽度 */
+#sidebar {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* 当 checkbox 被选中（checked）时：侧边栏滑入 */
+#sidebar-toggle:checked ~ #sidebar {
+  transform: translateX(0);
+}
+
+/* 遮罩层（手机端常用）：checked 时显示 */
+#sidebar-toggle:checked ~ #mobileOverlay {
+  display: block;
+}
+
+/* 大屏幕（桌面端）也强制默认收起 */
 @media (min-width: 1024px) {
-  #sidebar-toggle:checked ~ .sidebar { margin-left: -16rem; }
-  #sidebar-toggle:checked ~ .main-content { margin-left: 0; }
+  #sidebar {
+    transform: translateX(-100%);
+  }
+  
+  /* 桌面端展开时通常不显示遮罩（可选，根据需求保留或删除） */
+  #sidebar-toggle:checked ~ #mobileOverlay {
+    display: none;
+  }
 }
 
 /* 毛玻璃效果 - Light Mode */
