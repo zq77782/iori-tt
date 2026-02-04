@@ -891,48 +891,47 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-// 默认快捷键（后台未设置时使用）
-let shortcut = { ctrl: true, key: 'K' };
+// 全局存储当前快捷键（默认 Q）
+let currentShortcutKey = 'Q';
 
-// 从后台加载快捷键配置
-async function loadShortcutConfig() {
-  const str = localStorage.getItem('sidebar_shortcut') || 'Ctrl+K';
-  const parts = str.toLowerCase().split('+').map(p => p.trim());
-  shortcut = {
-    ctrl: parts.includes('ctrl') || parts.includes('command'),
-    alt: parts.includes('alt'),
-    shift: parts.includes('shift'),
-    key: parts[parts.length - 1].toUpperCase()
-  };
+// 从后台加载单个按键
+async function loadShortcutKey() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const key = data.sidebar_shortcut?.trim().toUpperCase();
+    if (key && key.length === 1) {
+      currentShortcutKey = key;
+    }
+  } catch {
+    console.warn('无法加载快捷键，使用默认 Q');
+  }
 }
 
-  // 页面加载时立即读取后台配置
-  document.addEventListener('DOMContentLoaded', () => {
-    loadShortcutConfig();
-  });
-  
-  // 键盘监听（使用从后台读取的配置）
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-  
-    const isCtrl = e.ctrlKey || e.metaKey;
-    const isAlt = e.altKey;
-    const isShift = e.shiftKey;
-    const key = e.key.toUpperCase();
-  
-    if (
-      (shortcut.ctrl ? isCtrl : true) &&
-      (shortcut.alt ? isAlt : true) &&
-      (shortcut.shift ? isShift : true) &&
-      key === shortcut.key
-    ) {
-      e.preventDefault();
-      const toggle = document.getElementById('sidebar-toggle');
-      toggle.checked = !toggle.checked;
-      const overlay = document.getElementById('mobileOverlay');
-      overlay.style.display = toggle.checked ? 'block' : 'none';
-    }
-  });
+// 页面加载时读取
+document.addEventListener('DOMContentLoaded', () => {
+  loadShortcutKey();
+});
+
+// 键盘监听：只监控单个键（不要求 Ctrl/Alt/Shift）
+document.addEventListener('keydown', (e) => {
+  // 避免输入框内触发
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+    return;
+  }
+
+  // 只判断按下的键是否匹配配置的单个键（忽略修饰键状态）
+  if (e.key.toUpperCase() === currentShortcutKey) {
+    e.preventDefault();  // 防止浏览器默认行为
+
+    const toggle = document.getElementById('sidebar-toggle');
+    toggle.checked = !toggle.checked;
+
+    const overlay = document.getElementById('mobileOverlay');
+    overlay.style.display = toggle.checked ? 'block' : 'none';
+  }
+});
   
   // ========== Random Wallpaper Logic (Client-side) ==========
   (async function() {
