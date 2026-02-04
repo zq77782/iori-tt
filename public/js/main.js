@@ -896,22 +896,14 @@ let shortcut = { ctrl: true, key: 'K' };
 
 // 从后台加载快捷键配置
 async function loadShortcutConfig() {
-  try {
-    const res = await fetch('/api/settings');
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const str = data.sidebar_shortcut?.trim() || 'Ctrl+K';
-
-    const parts = str.toLowerCase().split('+').map(p => p.trim());
-    shortcut = {
-      ctrl: parts.includes('ctrl') || parts.includes('command'),
-      alt: parts.includes('alt'),
-      shift: parts.includes('shift'),
-      key: parts[parts.length - 1].toUpperCase()
-    };
-  } catch {
-    console.warn('无法加载快捷键设置，使用默认 Ctrl+K');
-  }
+  const str = localStorage.getItem('sidebar_shortcut') || 'Ctrl+K';
+  const parts = str.toLowerCase().split('+').map(p => p.trim());
+  shortcut = {
+    ctrl: parts.includes('ctrl') || parts.includes('command'),
+    alt: parts.includes('alt'),
+    shift: parts.includes('shift'),
+    key: parts[parts.length - 1].toUpperCase()
+  };
 }
 
   // 页面加载时立即读取后台配置
