@@ -1107,10 +1107,17 @@
     <script src="/js/admin-settings.js?v=98ad0b1b"></script>
     <script src="/js/admin-import-export.js?v=43a1de60"></script>
     <script>
-    // 保存按钮点击事件 - 只附加快捷键保存逻辑，不重新声明 saveBtn
-    if (saveBtn) {  
-      saveBtn.addEventListener('click', async function(event) {        
-        const value = document.getElementById('sidebarShortcutInput')?.value?.trim();
+    // 保存快捷键逻辑 - 独立获取按钮，避免变量未定义
+    document.addEventListener('DOMContentLoaded', () => {
+      const saveBtn = document.getElementById('saveSettingsBtn');
+      if (!saveBtn) {
+        console.warn('未找到保存按钮 #saveSettingsBtn');
+        return;
+      }
+    
+      saveBtn.addEventListener('click', async function() {
+        const input = document.getElementById('sidebarShortcutInput');
+        const value = input?.value?.trim();
         if (!value) return;
     
         try {
@@ -1120,16 +1127,16 @@
             body: JSON.stringify({ sidebar_shortcut: value })
           });
     
-          if (!response.ok) {
-            console.warn('快捷键保存失败', response.status);
+          if (response.ok) {
+            console.log('快捷键已保存到后端');
           } else {
-            console.log('快捷键已保存');
+            console.warn('快捷键保存失败，状态码：', response.status);
           }
         } catch (error) {
-          console.error('保存快捷键出错', error);
+          console.error('保存快捷键时发生网络错误：', error);
         }
       });
-    }
+    });
     </script>
     
   </body>
