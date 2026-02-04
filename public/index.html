@@ -189,51 +189,33 @@
   <script src="/js/main.js?v=d93858ea"></script>
 
   <script>
-  // 每次 URL 参数变化时强制关闭侧边栏
-  function closeSidebarOnChange() {
-    const toggle = document.getElementById('sidebar-toggle');
-    const overlay = document.getElementById('mobileOverlay');
-    if (toggle) toggle.checked = false;
-    if (overlay) overlay.style.display = 'none';
-  }
-  
-  // 页面初次加载关闭
-  document.addEventListener('DOMContentLoaded', closeSidebarOnChange);
-  
-  // 监听 URL hash 或参数变化（适用于单页跳转）
-  window.addEventListener('popstate', closeSidebarOnChange);
-  
-  // 主动拦截分类链接点击
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('a[href*="?catalog="]')) {
-      // 延迟关闭，给页面渲染留时间
-      setTimeout(closeSidebarOnChange, 50);
+    // 每次页面加载或 URL 变化时，强制关闭侧边栏
+    function closeSidebarOnNavigation() {
+      const toggle = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('mobileOverlay');
+      
+      if (toggle) {
+        toggle.checked = false;
+      }
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
     }
-  });
-  </script>  
-
-  <script>
-  // 跳转到后台或其他链接时强制关闭侧边栏
-  document.addEventListener('click', function(e) {
-    const link = e.target.closest('a[href="/admin"]');
-    if (link) {
-      // 延迟关闭，给页面跳转留时间
-      setTimeout(() => {
-        const toggle = document.getElementById('sidebar-toggle');
-        const overlay = document.getElementById('mobileOverlay');
-        if (toggle) toggle.checked = false;
-        if (overlay) overlay.style.display = 'none';
-      }, 50);
-    }
-  });
   
-  // 页面加载时也强制关闭一次（防止状态残留）
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.getElementById('sidebar-toggle');
-    const overlay = document.getElementById('mobileOverlay');
-    if (toggle) toggle.checked = false;
-    if (overlay) overlay.style.display = 'none';
-  });
+    // 页面初次加载时关闭
+    document.addEventListener('DOMContentLoaded', closeSidebarOnNavigation);
+  
+    // 监听 popstate（浏览器前进/后退）
+    window.addEventListener('popstate', closeSidebarOnNavigation);
+  
+    // 拦截所有分类链接点击（因为是单页应用或参数变化）
+    document.addEventListener('click', function(e) {
+      const link = e.target.closest('a[href*="?catalog="]');
+      if (link) {
+        // 延迟关闭，让跳转先发生
+        setTimeout(closeSidebarOnNavigation, 100);
+      }
+    });
   </script>
 
   
