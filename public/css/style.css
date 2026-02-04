@@ -552,32 +552,34 @@ header {
   overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word;
 }
 
-/* 隐藏 checkbox */
+/* 隐藏 checkbox 本身 */
 #sidebar-toggle {
   display: none;
 }
 
-/* 侧边栏默认状态 */
+/* 侧边栏默认收起状态：向左平移自身宽度 */
 #sidebar {
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
 }
 
-/* checked 时展开 */
+/* 当 checkbox 被选中（checked）时：侧边栏滑入 */
 #sidebar-toggle:checked ~ #sidebar {
-  transform: translateX(0) !important; /* 加 !important 避免被覆盖 */
+  transform: translateX(0) !important; /* 强制覆盖任何冲突样式 */
 }
 
-/* 遮罩层 */
+/* 遮罩层（手机端常用）：checked 时显示 */
 #sidebar-toggle:checked ~ #mobileOverlay {
   display: block !important;
 }
 
-/* 桌面端强制收起 */
+/* 大屏幕（桌面端）也强制默认收起 */
 @media (min-width: 1024px) {
   #sidebar {
     transform: translateX(-100%);
   }
+  
+  /* 桌面端展开时通常不显示遮罩 */
   #sidebar-toggle:checked ~ #mobileOverlay {
     display: none;
   }
