@@ -188,45 +188,18 @@
   </div>
   
   <script src="/js/main.js?v=d93858ea"></script>
-
   <script>
-  // 关闭侧边栏的通用函数
-  function closeSidebar() {
-    const toggle = document.getElementById('sidebar-toggle');
-    const overlay = document.getElementById('mobileOverlay');
-    
-    if (toggle) {
-      toggle.checked = false;
+    // 页面加载和 popstate 时强制关闭
+    function closeSidebar() {
+      const toggle = document.getElementById('sidebar-toggle');
+      const overlay = document.getElementById('mobileOverlay');
+      if (toggle) toggle.checked = false;
+      if (overlay) overlay.style.display = 'none';
     }
-    if (overlay) {
-      overlay.style.display = 'none';
-    }
-  }
   
-  // 页面初次加载时关闭侧边栏
-  document.addEventListener('DOMContentLoaded', closeSidebar);
-  
-  // 监听浏览器前进/后退事件
-  window.addEventListener('popstate', closeSidebar);
-  
-  // 监听分类链接点击（只监听分类区域，避免干扰其他按钮）
-  document.addEventListener('DOMContentLoaded', () => {
-    // 分类链接通常位于 .space-y-1 容器内（根据您的 HTML 结构）
-    const catalogContainer = document.querySelector('.space-y-1');
-    
-    if (catalogContainer) {
-      catalogContainer.addEventListener('click', (event) => {
-        // 查找最近的 <a> 元素，且 href 包含 ?catalog=
-        const link = event.target.closest('a[href*="?catalog="]');
-        if (link) {
-          // 延迟 100ms 关闭，给页面处理 URL 变化留时间
-          setTimeout(closeSidebar, 100);
-        }
-      });
-    } else {
-      console.warn('未找到分类链接容器 .space-y-1，请检查选择器');
-    }
-  });
+    document.addEventListener('DOMContentLoaded', closeSidebar);
+    window.addEventListener('popstate', closeSidebar);
   </script>
+
 </body>
 </html>
