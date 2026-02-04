@@ -534,6 +534,25 @@
                             <p class="text-xs text-gray-500 mt-1 px-1">支持格式示例：Ctrl+K、Alt+S、Ctrl+Shift+/、Command+K</p>
                         </div>
                     </div>  
+
+
+                    <script>
+                    document.addEventListener('DOMContentLoaded', async () => {
+                      try {
+                        const response = await fetch('/api/settings');
+                        if (!response.ok) throw new Error('网络响应失败');
+                        const settings = await response.json();
+                        
+                        const input = document.getElementById('sidebarShortcutInput');
+                        if (input && settings.sidebar_shortcut) {
+                          input.value = settings.sidebar_shortcut;
+                        }
+                      } catch (error) {
+                        console.warn('无法加载快捷键设置', error);
+                        // 可选：保持默认值 placeholder
+                      }
+                    });
+                    </script>
                   
                     <!-- 一言设置 -->
                     <div class="p-3 bg-gray-50 rounded border border-gray-100 mt-3">
@@ -1087,5 +1106,37 @@
     <script src="/js/admin-batch.js?v=a09a01ec"></script>
     <script src="/js/admin-settings.js?v=98ad0b1b"></script>
     <script src="/js/admin-import-export.js?v=43a1de60"></script>
+    <script>
+    // 保存按钮点击事件
+    const saveBtn = document.getElementById('saveSettingsBtn');
+    if (saveBtn) {
+      // 备份原有点击事件（避免覆盖其他保存逻辑）
+      const originalHandler = saveBtn.onclick || (() => {});
+    
+      saveBtn.addEventListener('click', async function(event) {
+        // 先执行原有保存逻辑
+        originalHandler.call(this, event);
+    
+        const value = document.getElementById('sidebarShortcutInput')?.value?.trim();
+        if (!value) return;
+    
+        try {
+          const response = await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sidebar_shortcut: value })
+          });
+    
+          if (!response.ok) {
+            console.warn('快捷键保存失败', response.status);
+            // 可选：alert('快捷键保存失败');
+          }
+        } catch (error) {
+          console.error('保存快捷键出错', error);
+        }
+      });
+    }
+    </script>
+    
   </body>
 </html>
