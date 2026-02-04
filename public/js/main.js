@@ -893,21 +893,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-// 固定快捷键：Q（单个键）
+// 当前快捷键（默认 Q）
+let currentShortcutKey = 'Q';
+
+// 关闭侧边栏的通用函数
+function closeSidebar() {
+  const toggle = document.getElementById('sidebar-toggle');
+  const overlay = document.getElementById('mobileOverlay');
+  
+  if (toggle) {
+    toggle.checked = false;
+  }
+  if (overlay) {
+    overlay.style.display = 'none';
+  }
+}
+
+// 加载快捷键配置（可选，如果您仍想保留后台读取）
+async function loadShortcutKey() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) return;
+    const data = await res.json();
+    const key = data?.data?.sidebar_shortcut?.trim().toUpperCase();
+    if (key && key.length > 0) {
+      currentShortcutKey = key;
+    }
+  } catch (err) {
+    // 静默失败，使用默认 Q
+  }
+}
+
+// 页面加载时执行
+document.addEventListener('DOMContentLoaded', () => {
+  loadShortcutKey();
+  closeSidebar(); // 初次加载强制关闭
+});
+
+// 键盘快捷键
 document.addEventListener('keydown', (e) => {
-  // 避免在输入框、搜索框等地方触发
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
     return;
   }
 
-  // 只判断是否按了 Q 或 q
-  if (e.key.toUpperCase() === 'Q') {
+  if (e.key.toUpperCase() === currentShortcutKey) {
     e.preventDefault();
-
     const toggle = document.getElementById('sidebar-toggle');
     if (toggle) {
       toggle.checked = !toggle.checked;
-
       const overlay = document.getElementById('mobileOverlay');
       if (overlay) {
         overlay.style.display = toggle.checked ? 'block' : 'none';
@@ -916,24 +949,37 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-
-// 点击侧边栏外部区域自动关闭
+// 外部点击收起（更严格的判断）
 document.addEventListener('click', function(event) {
-  const sidebar = document.getElementById('sidebar');
   const toggle = document.getElementById('sidebar-toggle');
-  const overlay = document.getElementById('mobileOverlay');
+  if (!toggle || !toggle.checked) return;
 
-  // 如果侧边栏当前是展开状态
-  if (toggle && toggle.checked) {
-    // 点击的位置不在侧边栏内部，且不是点击了展开按钮本身
-    if (!sidebar.contains(event.target) &&
-        !event.target.closest('label[for="sidebar-toggle"]')) {
-      
-      toggle.checked = false;
-      if (overlay) {
-        overlay.style.display = 'none';
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const target = event.target;
+
+  // 如果点击的是侧边栏内部、汉堡按钮、或遮罩层本身，不关闭
+  if (
+    sidebar?.contains(target) ||
+    target.closest('label[for="sidebar-toggle"]') ||
+    overlay?.contains(target)
+  ) {
+    return;
+  }
+
+  // 其他区域点击 → 关闭
+  closeSidebar();
+});
+
+// 分类链接点击关闭
+document.addEventListener('DOMContentLoaded', () => {
+  const catalogContainer = document.querySelector('.space-y-1'); // 您的分类容器 class
+  if (catalogContainer) {
+    catalogContainer.addEventListener('click', (e) => {
+      if (e.target.closest('a[href*="?catalog="]')) {
+        setTimeout(closeSidebar, 150); // 延迟稍长，确保页面渲染完成
       }
-    }
+    });
   }
 });
   
