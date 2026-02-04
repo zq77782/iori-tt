@@ -949,6 +949,27 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+
+// 点击侧边栏外部区域自动关闭
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebar-toggle');
+  const overlay = document.getElementById('mobileOverlay');
+
+  // 如果侧边栏当前是展开状态
+  if (toggle && toggle.checked) {
+    // 点击的位置不在侧边栏内部，且不是点击了展开按钮本身
+    if (!sidebar.contains(event.target) &&
+        !event.target.closest('label[for="sidebar-toggle"]')) {
+      
+      toggle.checked = false;
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    }
+  }
+});
+  
   
   // ========== Random Wallpaper Logic (Client-side) ==========
   (async function() {
