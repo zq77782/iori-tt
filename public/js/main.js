@@ -994,16 +994,4 @@ document.addEventListener('click', function(event) {
           console.error('Failed to fetch random wallpaper:', e);
       }
   })();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const toggleLabel = document.querySelector('label[for="sidebar-toggle"]');
-  if (toggleLabel) {
-    toggleLabel.addEventListener('click', () => {
-      console.log('汉堡 label 被点击了');
-    });
-  } else {
-    console.log('未找到汉堡 label');
-  }
-});
-
 });
