@@ -994,4 +994,27 @@ document.addEventListener('click', function(event) {
           console.error('Failed to fetch random wallpaper:', e);
       }
   })();
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 监听整个文档的 mousedown（比 click 更早触发）
+  document.addEventListener('mousedown', (e) => {
+    const target = e.target;
+    // 判断是否点击在汉堡按钮或其子元素上
+    if (target.closest('label[for="sidebar-toggle"]') || target.closest('.fixed.top-4.left-4')) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const toggle = document.getElementById('sidebar-toggle');
+      if (toggle) {
+        toggle.checked = !toggle.checked;
+        const overlay = document.getElementById('mobileOverlay');
+        if (overlay) {
+          overlay.style.display = toggle.checked ? 'block' : 'none';
+        }
+        console.log('JS 捕获点击，切换状态为：', toggle.checked);
+      }
+    }
+  }, { capture: true }); // 使用 capture 阶段，更早捕获事件
+});
+
 });
