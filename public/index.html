@@ -26,7 +26,7 @@
   <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 mobile-overlay lg:hidden"></div>
   
   <!-- 桌面侧边栏开关按钮 -->
-  <div class="fixed top-4 left-4 z-[9999] hidden lg:block {{SIDEBAR_TOGGLE_CLASS}}">
+  <div class="fixed top-4 left-4 z-50 hidden lg:block {{SIDEBAR_TOGGLE_CLASS}}">
     <label for="sidebar-toggle" class="p-2 rounded-lg bg-white shadow-md hover:bg-gray-100 inline-block cursor-pointer">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -208,14 +208,13 @@
     // 监听 popstate（浏览器前进/后退）
     window.addEventListener('popstate', closeSidebarOnNavigation);
   
-    // 拦截所有分类链接点击（因为是单页应用或参数变化）
-    document.addEventListener('click', function(e) {
-      const link = e.target.closest('a[href*="?catalog="]');
-      if (link) {
-        // 延迟关闭，让跳转先发生
-        setTimeout(closeSidebarOnNavigation, 100);
-      }
-    });
+    // 注释掉或删除这个全局点击拦截（它干扰了 label 点击）
+    // document.addEventListener('click', function(e) {
+    //   const link = e.target.closest('a[href*="?catalog="]');
+    //   if (link) {
+    //     setTimeout(closeSidebarOnNavigation, 100);
+    //   }
+    // });
   </script>
 
   
