@@ -552,44 +552,12 @@ header {
   overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word;
 }
 
-/* 隐藏 checkbox */
-#sidebar-toggle {
-  display: none;
-}
-
-/* 侧边栏默认收起 */
-#sidebar {
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* checked 时侧边栏滑入 */
-#sidebar-toggle:checked ~ #sidebar {
-  transform: translateX(0) !important;
-}
-
-/* 主体内容向右推开（关键） */
-.main-content {
-  transition: margin-left 0.3s ease-in-out;
-  margin-left: 0;
-}
-
-/* checked 时主体内容让出空间 */
-#sidebar-toggle:checked ~ .main-content {
-  margin-left: 16rem !important; /* 16rem = w-64 的宽度，保持与侧边栏宽度一致 */
-}
-
-/* 遮罩层 */
-#sidebar-toggle:checked ~ #mobileOverlay {
-  display: block !important;
-}
-
-/* 桌面端强制收起遮罩 */
+#sidebar-toggle { display: none; }
 @media (min-width: 1024px) {
-  #sidebar-toggle:checked ~ #mobileOverlay {
-    display: none;
-  }
+  #sidebar-toggle:checked ~ .sidebar { margin-left: -16rem; }
+  #sidebar-toggle:checked ~ .main-content { margin-left: 0; }
 }
+
 
 /* 毛玻璃效果 - Light Mode */
 .frosted-glass-effect {
