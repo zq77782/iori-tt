@@ -216,6 +216,30 @@
       }
     });
   </script>
+
+  <script>
+  // 每次 URL 参数变化时强制关闭侧边栏
+  function closeSidebarOnChange() {
+    const toggle = document.getElementById('sidebar-toggle');
+    const overlay = document.getElementById('mobileOverlay');
+    if (toggle) toggle.checked = false;
+    if (overlay) overlay.style.display = 'none';
+  }
   
+  // 页面初次加载关闭
+  document.addEventListener('DOMContentLoaded', closeSidebarOnChange);
+  
+  // 监听 URL hash 或参数变化（适用于单页跳转）
+  window.addEventListener('popstate', closeSidebarOnChange);
+  
+  // 主动拦截分类链接点击
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('a[href*="?catalog="]')) {
+      // 延迟关闭，给页面渲染留时间
+      setTimeout(closeSidebarOnChange, 50);
+    }
+  });
+  </script>  
+
 </body>
 </html>
