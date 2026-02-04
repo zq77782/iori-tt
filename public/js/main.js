@@ -891,63 +891,41 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-// 全局存储当前快捷键（默认 Q）
+// 当前快捷键（从后台加载，默认为 Q）
 let currentShortcutKey = 'Q';
 
-// 从后台加载单个按键
+// 加载后台设置的单个按键
 async function loadShortcutKey() {
   try {
     const res = await fetch('/api/settings');
     if (!res.ok) throw new Error();
     const data = await res.json();
     const key = data.sidebar_shortcut?.trim().toUpperCase();
-    if (key && key.length === 1) {
+    if (key && key.length > 0) {  // 支持单个键或简单字符串
       currentShortcutKey = key;
     }
-  } catch {
-    console.warn('无法加载快捷键，使用默认 Q');
+  } catch (err) {
+    console.warn('加载快捷键失败，使用默认 Q', err);
   }
 }
 
-// 页面加载时读取
+// 页面加载时执行
 document.addEventListener('DOMContentLoaded', () => {
   loadShortcutKey();
 });
 
-// 键盘监听：只监控单个键（不要求 Ctrl/Alt/Shift）
+// 键盘监听：响应后台配置的键
 document.addEventListener('keydown', (e) => {
-  // 避免输入框内触发
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
     return;
   }
 
-  // 只判断按下的键是否匹配配置的单个键（忽略修饰键状态）
   if (e.key.toUpperCase() === currentShortcutKey) {
-    e.preventDefault();  // 防止浏览器默认行为
-
+    e.preventDefault();
     const toggle = document.getElementById('sidebar-toggle');
     toggle.checked = !toggle.checked;
-
     const overlay = document.getElementById('mobileOverlay');
     overlay.style.display = toggle.checked ? 'block' : 'none';
-  }
-});
-
-// 点击侧边栏外部区域（包括主内容区、header、footer 等）自动关闭
-document.addEventListener('click', function(event) {
-  const sidebar = document.getElementById('sidebar');
-  const toggle = document.getElementById('sidebar-toggle');
-  const overlay = document.getElementById('mobileOverlay');
-
-  // 如果侧边栏当前是展开状态
-  if (toggle.checked) {
-    // 点击的位置不在侧边栏内部，且不是点击了展开按钮本身
-    if (!sidebar.contains(event.target) && 
-        !event.target.closest('label[for="sidebar-toggle"]')) {
-      
-      toggle.checked = false;
-      overlay.style.display = 'none';
-    }
   }
 });
 
