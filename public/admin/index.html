@@ -524,40 +524,34 @@
                     <div class="p-3 bg-gray-50 rounded border border-gray-100 mt-3">
                         <h4 class="text-sm font-bold text-gray-700 mb-3 border-b border-gray-200 pb-1">侧边栏快捷键</h4>
                         <div>
-                            <label for="sidebarShortcutInput" class="block text-xs text-gray-500 mb-1">快捷键组合</label>
-                            <input 
-                                type="text" 
-                                id="sidebarShortcutInput" 
-                                placeholder="Ctrl+K" 
-                                class="w-full text-sm p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            <label for="sidebarShortcutInput" class="block text-xs text-gray-500 mb-1">快捷键（单个按键）</label>
+                            <input
+                                type="text"
+                                id="sidebarShortcutInput"
+                                placeholder="Q"
+                                maxlength="1"
+                                class="w-full text-sm p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase"
                             >
-                            <p class="text-xs text-gray-500 mt-1 px-1">支持格式示例：Ctrl+K、Alt+S、Ctrl+Shift+/、Command+K</p>
+                            <p class="text-xs text-gray-500 mt-1 px-1">输入单个字母、数字或符号（如 Q、F、/、=），保存后即生效</p>
                         </div>
-                    </div>  
+                    </div>
 
 
                     <script>
-                    // 加载（从 localStorage）
-                    document.addEventListener('DOMContentLoaded', () => {
-                      const saved = localStorage.getItem('sidebar_shortcut');
-                      const input = document.getElementById('sidebarShortcutInput');
-                      if (input && saved) {
-                        input.value = saved;
+                    document.addEventListener('DOMContentLoaded', async () => {
+                      try {
+                        const response = await fetch('/api/settings');
+                        if (!response.ok) throw new Error('网络响应失败');
+                        const settings = await response.json();
+                        
+                        const input = document.getElementById('sidebarShortcutInput');
+                        if (input && settings.sidebar_shortcut) {
+                          input.value = settings.sidebar_shortcut.toUpperCase();  // 统一大写显示
+                        }
+                      } catch (error) {
+                        console.warn('无法加载快捷键设置', error);
                       }
                     });
-                    
-                    // 保存（存 localStorage）
-                    const saveBtn = document.getElementById('saveSettingsBtn');
-                    if (saveBtn) {
-                      saveBtn.addEventListener('click', () => {
-                        const value = document.getElementById('sidebarShortcutInput')?.value?.trim();
-                        if (value) {
-                          localStorage.setItem('sidebar_shortcut', value);
-                          console.log('快捷键已保存到 localStorage:', value);
-                          // 可选：alert('快捷键已保存');
-                        }
-                      });
-                    }
                     </script>
                   
                     <!-- 一言设置 -->
