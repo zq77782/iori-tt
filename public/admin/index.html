@@ -537,21 +537,27 @@
 
 
                     <script>
-                    document.addEventListener('DOMContentLoaded', async () => {
-                      try {
-                        const response = await fetch('/api/settings');
-                        if (!response.ok) throw new Error('网络响应失败');
-                        const settings = await response.json();
-                        
-                        const input = document.getElementById('sidebarShortcutInput');
-                        if (input && settings.sidebar_shortcut) {
-                          input.value = settings.sidebar_shortcut;
-                        }
-                      } catch (error) {
-                        console.warn('无法加载快捷键设置', error);
-                        // 可选：保持默认值 placeholder
+                    // 加载（从 localStorage）
+                    document.addEventListener('DOMContentLoaded', () => {
+                      const saved = localStorage.getItem('sidebar_shortcut');
+                      const input = document.getElementById('sidebarShortcutInput');
+                      if (input && saved) {
+                        input.value = saved;
                       }
                     });
+                    
+                    // 保存（存 localStorage）
+                    const saveBtn = document.getElementById('saveSettingsBtn');
+                    if (saveBtn) {
+                      saveBtn.addEventListener('click', () => {
+                        const value = document.getElementById('sidebarShortcutInput')?.value?.trim();
+                        if (value) {
+                          localStorage.setItem('sidebar_shortcut', value);
+                          console.log('快捷键已保存到 localStorage:', value);
+                          // 可选：alert('快捷键已保存');
+                        }
+                      });
+                    }
                     </script>
                   
                     <!-- 一言设置 -->
