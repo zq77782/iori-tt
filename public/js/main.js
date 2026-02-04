@@ -891,36 +891,56 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-// 当前快捷键（从后台加载，默认为 Q）
+
+// 从静态 JSON 文件读取快捷键配置
 let currentShortcutKey = 'Q'; // 默认值
 
-// 立即加载快捷键配置（不等 DOMContentLoaded）
-console.log('main.js 开始执行，尝试加载快捷键配置...');
-
-(async function loadShortcutImmediately() {
+(async function loadShortcutFromJson() {
   try {
-    console.log('开始 fetch /api/settings');
-    const res = await fetch('/api/settings');
+    console.log('开始读取 /kuaijie.json');
+    const res = await fetch('/kuaijie.json');
     console.log('fetch 状态码：', res.status);
 
     if (!res.ok) {
-      throw new Error(`接口返回 ${res.status}`);
+      throw new Error(`状态码 ${res.status}`);
     }
 
     const data = await res.json();
-    console.log('读取到的完整配置：', data);
+    console.log('读取到的配置：', data);
 
-    const savedKey = data.sidebar_shortcut;
-    if (savedKey && typeof savedKey === 'string' && savedKey.trim().length > 0) {
-      currentShortcutKey = savedKey.trim().toUpperCase();
-      console.log('成功应用快捷键：', currentShortcutKey);
+    const key = data.shortcut?.trim().toUpperCase();
+    if (key && key.length > 0) {
+      currentShortcutKey = key;
+      console.log('应用快捷键：', currentShortcutKey);
     } else {
-      console.log('无有效 sidebar_shortcut，使用默认 Q');
+      console.log('配置无效，使用默认 Q');
     }
   } catch (err) {
-    console.error('加载快捷键失败：', err);
+    console.error('读取 kuaijie.json 失败：', err);
   }
 })();
+
+// 键盘监听
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+    return;
+  }
+
+  const pressed = e.key.toUpperCase();
+  console.log('按键：', pressed, '当前配置：', currentShortcutKey);
+
+  if (pressed === currentShortcutKey) {
+    console.log('匹配成功，切换侧边栏');
+    e.preventDefault();
+
+    const toggle = document.getElementById('sidebar-toggle');
+    if (toggle) {
+      toggle.checked = !toggle.checked;
+      const overlay = document.getElementById('mobileOverlay');
+      if (overlay) overlay.style.display = toggle.checked ? 'block' : 'none';
+    }
+  }
+});
 
   
   // ========== Random Wallpaper Logic (Client-side) ==========
