@@ -187,36 +187,6 @@
   </div>
   
   <script src="/js/main.js?v=d93858ea"></script>
-
-  <script>
-    // 每次页面加载或 URL 变化时，强制关闭侧边栏
-    function closeSidebarOnNavigation() {
-      const toggle = document.getElementById('sidebar-toggle');
-      const overlay = document.getElementById('mobileOverlay');
-      
-      if (toggle) {
-        toggle.checked = false;
-      }
-      if (overlay) {
-        overlay.style.display = 'none';
-      }
-    }
-  
-    // 页面初次加载时关闭
-    document.addEventListener('DOMContentLoaded', closeSidebarOnNavigation);
-  
-    // 监听 popstate（浏览器前进/后退）
-    window.addEventListener('popstate', closeSidebarOnNavigation);
-  
-    // 注释掉或删除这个全局点击拦截（它干扰了 label 点击）
-    // document.addEventListener('click', function(e) {
-    //   const link = e.target.closest('a[href*="?catalog="]');
-    //   if (link) {
-    //     setTimeout(closeSidebarOnNavigation, 100);
-    //   }
-    // });
-  </script>
-
   
 </body>
 </html>
