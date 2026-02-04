@@ -893,51 +893,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // 从静态 JSON 文件读取快捷键配置
-let currentShortcutKey = 'Q'; // 默认值
+let currentShortcutKey = 'Q'; // 默认回退值
 
-(async function loadShortcutFromJson() {
+(async function loadShortcutConfig() {
   try {
-    console.log('开始读取 /kuaijie.json');
     const res = await fetch('/kuaijie.json');
-    console.log('fetch 状态码：', res.status);
-
     if (!res.ok) {
-      throw new Error(`状态码 ${res.status}`);
+      console.warn('读取 kuaijie.json 失败，状态码：', res.status);
+      return;
     }
 
     const data = await res.json();
-    console.log('读取到的配置：', data);
-
     const key = data.shortcut?.trim().toUpperCase();
+
     if (key && key.length > 0) {
       currentShortcutKey = key;
-      console.log('应用快捷键：', currentShortcutKey);
+      console.log('快捷键配置加载成功：', currentShortcutKey);
     } else {
       console.log('配置无效，使用默认 Q');
     }
   } catch (err) {
-    console.error('读取 kuaijie.json 失败：', err);
+    console.error('加载快捷键配置出错：', err);
   }
 })();
 
 // 键盘监听
 document.addEventListener('keydown', (e) => {
+  // 防止在输入框、搜索框等地方触发
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
     return;
   }
 
-  const pressed = e.key.toUpperCase();
-  console.log('按键：', pressed, '当前配置：', currentShortcutKey);
+  const pressedKey = e.key.toUpperCase();
 
-  if (pressed === currentShortcutKey) {
-    console.log('匹配成功，切换侧边栏');
+  if (pressedKey === currentShortcutKey) {
     e.preventDefault();
 
     const toggle = document.getElementById('sidebar-toggle');
     if (toggle) {
       toggle.checked = !toggle.checked;
       const overlay = document.getElementById('mobileOverlay');
-      if (overlay) overlay.style.display = toggle.checked ? 'block' : 'none';
+      if (overlay) {
+        overlay.style.display = toggle.checked ? 'block' : 'none';
+      }
     }
   }
 });
