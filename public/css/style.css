@@ -552,10 +552,63 @@ header {
   overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word;
 }
 
-#sidebar-toggle { display: none; }
+/* 隐藏 checkbox */
+#sidebar-toggle {
+  display: none;
+}
+
+/* 手机端侧边栏与遮罩（原版渐变效果） */
+@media (max-width: 1023px) {
+  .mobile-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .mobile-sidebar.open {
+    transform: translateX(0);
+  }
+  .mobile-overlay {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .mobile-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* 通用侧边栏默认收起 */
+.sidebar {
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* 桌面端：checked = 收起（原版逻辑） */
 @media (min-width: 1024px) {
-  #sidebar-toggle:checked ~ .sidebar { margin-left: -16rem; }
-  #sidebar-toggle:checked ~ .main-content { margin-left: 0; }
+  #sidebar-toggle:checked ~ .sidebar {
+    margin-left: -16rem !important;
+  }
+  #sidebar-toggle:checked ~ .main-content {
+    margin-left: 0 !important;
+  }
+  #sidebar-toggle:checked ~ #mobileOverlay {
+    display: none !important;
+  }
+}
+
+/* 主体内容默认 */
+.main-content {
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 16rem; /* 默认让出空间（收起时为 0） */
+}
+
+/* 行截断（保持原样） */
+.line-clamp-2 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  word-break: break-word;
 }
 
 
