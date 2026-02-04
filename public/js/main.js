@@ -995,21 +995,4 @@ document.addEventListener('click', function(event) {
       }
   })();
 
-// 强制监听 document 的点击，判断是否落在汉堡区域
-document.addEventListener('click', (e) => {
-  const label = document.querySelector('label[for="sidebar-toggle"]');
-  if (label && label.contains(e.target)) {
-    console.log('点击落在汉堡 label 上');
-    const toggle = document.getElementById('sidebar-toggle');
-    if (toggle) {
-      toggle.checked = !toggle.checked;
-      const overlay = document.getElementById('mobileOverlay');
-      if (overlay) {
-        overlay.style.display = toggle.checked ? 'block' : 'none';
-      }
-      console.log('JS 强制切换状态：', toggle.checked);
-    }
-  }
-});
-
 });
