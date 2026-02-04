@@ -892,41 +892,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // 当前快捷键（从后台加载，默认为 Q）
-let currentShortcutKey = 'Q';
+let currentShortcutKey = 'Q'; // 默认回退值
 
-// 加载后台设置的单个按键
 async function loadShortcutKey() {
   try {
     const res = await fetch('/api/settings');
-    if (!res.ok) throw new Error();
+    console.log('fetch /api/settings 状态码：', res.status); // 调试1：状态码
+
+    if (!res.ok) {
+      throw new Error(`接口返回 ${res.status}`);
+    }
+
     const data = await res.json();
-    const key = data.sidebar_shortcut?.trim().toUpperCase();
-    if (key && key.length > 0) {  // 支持单个键或简单字符串
-      currentShortcutKey = key;
+    console.log('从 /api/settings 读取到的完整数据：', data); // 调试2：完整 JSON
+
+    const savedKey = data.sidebar_shortcut;
+    if (savedKey && typeof savedKey === 'string' && savedKey.trim().length > 0) {
+      currentShortcutKey = savedKey.trim().toUpperCase();
+      console.log('成功应用快捷键：', currentShortcutKey); // 调试3：确认应用
+    } else {
+      console.log('数据库无有效 sidebar_shortcut 值，使用默认 Q');
     }
   } catch (err) {
-    console.warn('加载快捷键失败，使用默认 Q', err);
+    console.error('加载快捷键失败：', err);
   }
 }
 
-// 页面加载时执行
+// 确保在页面加载时执行
 document.addEventListener('DOMContentLoaded', () => {
   loadShortcutKey();
-});
-
-// 键盘监听：响应后台配置的键
-document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
-    return;
-  }
-
-  if (e.key.toUpperCase() === currentShortcutKey) {
-    e.preventDefault();
-    const toggle = document.getElementById('sidebar-toggle');
-    toggle.checked = !toggle.checked;
-    const overlay = document.getElementById('mobileOverlay');
-    overlay.style.display = toggle.checked ? 'block' : 'none';
-  }
 });
 
   
