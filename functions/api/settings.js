@@ -1,105 +1,69 @@
-
 import { isAdminAuthenticated, errorResponse, jsonResponse } from '../_middleware';
 
-export async function onRequestGet(context) {
+export async function onRequest(context) {
   const { request, env } = context;
 
-  if (!(await isAdminAuthenticated(request, env))) {
-    return errorResponse('Unauthorized', 401);
-  }
-
-  try {
-    // Try to get all settings
-    const { results } = await env.NAV_DB.prepare('SELECT key, value FROM settings').all();
-    
-    const settings = {};
-    if (results) {
-        results.forEach(row => {
-            // 忽略后端计算字段或调试字段，防止数据库脏数据覆盖
-            if (row.key === 'has_api_key' || row.key === 'debug_api_key_info') {
-                return;
-            }
-
-            // 敏感字段不返回给前端
-            if (row.key === 'apiKey') {
-                if (row.value && row.value.length > 0) {
-                    settings['has_api_key'] = true;
-                } else {
-                    settings['has_api_key'] = false;
-                }
-            } else {
-                settings[row.key] = row.value;
-            }
-        });
-    }
-    
-    // 强制调试：无论如何都设为 false，测试代码是否生效
-    // settings['has_api_key'] = row.value && row.value.length > 0; 
-    
-    return jsonResponse({
-      code: 200,
-      data: settings
-    });
-  } catch (e) {
-    // If table doesn't exist, return empty settings or try to create it?
-    // For GET, just returning empty is fine if it doesn't exist, but we might want to initialize it.
-    if (e.message && (e.message.includes('no such table') || e.message.includes('settings'))) {
-        return jsonResponse({
-            code: 200,
-            data: {} // No settings yet
-        });
-    }
-    return errorResponse(`Failed to fetch settings: ${e.message}`, 500);
-  }
-}
-
-export async function onRequestPost(context) {
-  const { request, env } = context;
-
-  if (!(await isAdminAuthenticated(request, env))) {
-    return errorResponse('Unauthorized', 401);
-  }
-
-  try {
-    const body = await request.json();
-    const settings = body; // Expecting object { key: value, key2: value2 }
-
-    if (!settings || typeof settings !== 'object') {
-        return errorResponse('Invalid settings data', 400);
-    }
-
-    // Ensure table exists
+  // GET：公开读取快捷键配置（无需登录）
+  if (request.method === 'GET') {
     try {
-        await env.NAV_DB.prepare(`
-            CREATE TABLE IF NOT EXISTS settings (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )
-        `).run();
+      // 优先从 KV 读取（更快、更适合公开配置）
+      let shortcut = await env.kj.get('sidebar_shortcut');
+
+      // 如果 KV 中没有，回退到 D1（兼容旧数据）
+      if (!shortcut) {
+        const result = await env.NAV_DB.prepare(
+          "SELECT value FROM settings WHERE key = 'sidebar_shortcut'"
+        ).first();
+        shortcut = result?.value || 'Q'; // 默认 Q
+      }
+
+      return jsonResponse({
+        code: 200,
+        data: { sidebar_shortcut: shortcut }
+      });
     } catch (e) {
-        console.error('Failed to ensure settings table:', e);
-        // Continue, maybe it exists or error will happen on upsert
+      console.error('读取快捷键失败：', e);
+      return jsonResponse({
+        code: 200,
+        data: { sidebar_shortcut: 'Q' } // 出错时返回默认值
+      });
     }
-
-    const stmt = env.NAV_DB.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
-    
-    const batch = [];
-    for (const [key, value] of Object.entries(settings)) {
-        // 不要保存临时字段
-        if (key === 'has_api_key' || key === 'debug_api_key_info') continue;
-        
-        batch.push(stmt.bind(key, String(value)));
-    }
-
-    if (batch.length > 0) {
-        await env.NAV_DB.batch(batch);
-    }
-
-    return jsonResponse({
-      code: 200,
-      message: 'Settings saved'
-    });
-  } catch (e) {
-    return errorResponse(`Failed to save settings: ${e.message}`, 500);
   }
+
+  // POST：保存快捷键（需要管理员登录）
+  if (request.method === 'POST') {
+    if (!(await isAdminAuthenticated(request, env))) {
+      return errorResponse('Unauthorized', 401);
+    }
+
+    try {
+      const body = await request.json();
+      const newShortcut = body.sidebar_shortcut?.trim();
+
+      if (!newShortcut || newShortcut.length === 0) {
+        return errorResponse('无效快捷键值', 400);
+      }
+
+      // 写入 KV（主存储）
+      await env.kj.put('sidebar_shortcut', newShortcut);
+
+      // 可选：同时写入 D1 作为备份（如果您想保留 D1 记录）
+      await env.NAV_DB.prepare(
+        'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)'
+      )
+        .bind('sidebar_shortcut', newShortcut)
+        .run();
+
+      return jsonResponse({
+        code: 200,
+        message: '快捷键已保存',
+        data: { sidebar_shortcut: newShortcut }
+      });
+    } catch (e) {
+      console.error('保存快捷键失败：', e);
+      return errorResponse(`保存失败：${e.message}`, 500);
+    }
+  }
+
+  return errorResponse('Method Not Allowed', 405);
 }
