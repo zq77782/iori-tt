@@ -892,34 +892,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-// 从静态 JSON 文件读取快捷键配置
-let currentShortcutKey = 'Q'; // 默认回退值
 
-(async function loadShortcutConfig() {
+// 当前快捷键（默认 Q）
+let currentShortcutKey = 'Q';
+
+// 加载快捷键配置
+async function loadShortcutKey() {
   try {
-    const res = await fetch('/kuaijie.json');
+    const res = await fetch('/api/settings');
     if (!res.ok) {
-      console.warn('读取 kuaijie.json 失败，状态码：', res.status);
+      console.warn('读取快捷键配置失败，状态码：', res.status);
       return;
     }
 
     const data = await res.json();
-    const key = data.shortcut?.trim().toUpperCase();
+    // 注意：接口返回格式为 { code: 200, data: { sidebar_shortcut: "W" } }
+    const key = data?.data?.sidebar_shortcut?.trim().toUpperCase();
 
     if (key && key.length > 0) {
       currentShortcutKey = key;
-      console.log('快捷键配置加载成功：', currentShortcutKey);
+      console.log('快捷键加载成功：', currentShortcutKey);
     } else {
-      console.log('配置无效，使用默认 Q');
+      console.log('未获取到有效快捷键，使用默认 Q');
     }
   } catch (err) {
-    console.error('加载快捷键配置出错：', err);
+    console.error('加载快捷键出错：', err);
   }
-})();
+}
+
+// 页面加载时执行
+document.addEventListener('DOMContentLoaded', () => {
+  loadShortcutKey();
+});
 
 // 键盘监听
 document.addEventListener('keydown', (e) => {
-  // 防止在输入框、搜索框等地方触发
+  // 避免在输入框、搜索框等地方触发
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
     return;
   }
@@ -932,6 +940,7 @@ document.addEventListener('keydown', (e) => {
     const toggle = document.getElementById('sidebar-toggle');
     if (toggle) {
       toggle.checked = !toggle.checked;
+
       const overlay = document.getElementById('mobileOverlay');
       if (overlay) {
         overlay.style.display = toggle.checked ? 'block' : 'none';
