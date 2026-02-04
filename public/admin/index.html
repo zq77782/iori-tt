@@ -1108,10 +1108,8 @@
     <script src="/js/admin-import-export.js?v=43a1de60"></script>
     <script>
     // 保存按钮点击事件 - 只附加快捷键保存逻辑，不重新声明 saveBtn
-    if (saveBtn) {  // 直接使用 admin-settings.js 中已定义的 saveBtn
-      saveBtn.addEventListener('click', async function(event) {
-        // 先让原有保存逻辑执行（如果有异步 await，可在此等待，但通常不需要）
-        
+    if (saveBtn) {  
+      saveBtn.addEventListener('click', async function(event) {        
         const value = document.getElementById('sidebarShortcutInput')?.value?.trim();
         if (!value) return;
     
