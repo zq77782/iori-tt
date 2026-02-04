@@ -937,6 +937,33 @@ document.addEventListener('click', function(event) {
   }
 });
   
+// 强制监听 document 的点击，判断是否落在汉堡区域
+document.addEventListener('mousedown', (e) => {
+  const target = e.target;
+  // 判断点击是否落在汉堡 label 或其容器上
+  if (target.closest('label[for="sidebar-toggle"]') || target.closest('.fixed.top-4.left-4')) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const toggle = document.getElementById('sidebar-toggle');
+    if (toggle) {
+      toggle.checked = !toggle.checked;
+
+      // 强制设置侧边栏位置（绕过 CSS 选择器问题）
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.style.transform = toggle.checked ? 'translateX(0)' : 'translateX(-100%)';
+      }
+
+      const overlay = document.getElementById('mobileOverlay');
+      if (overlay) {
+        overlay.style.display = toggle.checked ? 'block' : 'none';
+      }
+
+      console.log('JS 强制切换侧边栏：', toggle.checked ? '展开' : '关闭');
+    }
+  }
+}, { capture: true });  // capture: true 在事件冒泡前捕获
   
   // ========== Random Wallpaper Logic (Client-side) ==========
   (async function() {
