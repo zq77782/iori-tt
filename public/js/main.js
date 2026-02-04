@@ -891,28 +891,55 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
 
-  // 侧边栏快捷键切换（当前硬编码为 Ctrl + K，可后续改为从后台读取）
-  document.addEventListener('keydown', function(event) {
-      // 防止在输入框、文本区域等地方误触发
-      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
-          return;
-      }
+// 默认快捷键（后台未设置时使用）
+let shortcut = { ctrl: true, key: 'K' };
+
+// 从后台加载快捷键配置
+async function loadShortcutConfig() {
+  try {
+    const res = await fetch('/api/settings');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const str = data.sidebar_shortcut?.trim() || 'Ctrl+K';
+
+    const parts = str.toLowerCase().split('+').map(p => p.trim());
+    shortcut = {
+      ctrl: parts.includes('ctrl') || parts.includes('command'),
+      alt: parts.includes('alt'),
+      shift: parts.includes('shift'),
+      key: parts[parts.length - 1].toUpperCase()
+    };
+  } catch {
+    console.warn('无法加载快捷键设置，使用默认 Ctrl+K');
+  }
+}
+
+  // 页面加载时立即读取后台配置
+  document.addEventListener('DOMContentLoaded', () => {
+    loadShortcutConfig();
+  });
   
-      // 支持 Ctrl 或 Command（Mac）
-      const isModifierPressed = event.ctrlKey || event.metaKey;
-      const isTargetKey = event.key.toUpperCase() === 'K';
+  // 键盘监听（使用从后台读取的配置）
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
   
-      // 可选：排除 Shift / Alt 组合，避免冲突
-      if (isModifierPressed && isTargetKey && !event.shiftKey && !event.altKey) {
-          event.preventDefault();  // 防止浏览器默认行为（如打开新标签等）
+    const isCtrl = e.ctrlKey || e.metaKey;
+    const isAlt = e.altKey;
+    const isShift = e.shiftKey;
+    const key = e.key.toUpperCase();
   
-          const toggle = document.getElementById('sidebar-toggle');
-          toggle.checked = !toggle.checked;
-  
-          // 同步手机端遮罩层显示/隐藏
-          const overlay = document.getElementById('mobileOverlay');
-          overlay.style.display = toggle.checked ? 'block' : 'none';
-      }
+    if (
+      (shortcut.ctrl ? isCtrl : true) &&
+      (shortcut.alt ? isAlt : true) &&
+      (shortcut.shift ? isShift : true) &&
+      key === shortcut.key
+    ) {
+      e.preventDefault();
+      const toggle = document.getElementById('sidebar-toggle');
+      toggle.checked = !toggle.checked;
+      const overlay = document.getElementById('mobileOverlay');
+      overlay.style.display = toggle.checked ? 'block' : 'none';
+    }
   });
   
   // ========== Random Wallpaper Logic (Client-side) ==========
