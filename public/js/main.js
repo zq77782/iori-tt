@@ -893,48 +893,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-// 当前快捷键（默认 Q）
-let currentShortcutKey = 'Q';
-
-// 加载快捷键配置
-async function loadShortcutKey() {
-  try {
-    const res = await fetch('/api/settings');
-    if (!res.ok) {
-      console.warn('读取快捷键配置失败，状态码：', res.status);
-      return;
-    }
-
-    const data = await res.json();
-    // 注意：接口返回格式为 { code: 200, data: { sidebar_shortcut: "W" } }
-    const key = data?.data?.sidebar_shortcut?.trim().toUpperCase();
-
-    if (key && key.length > 0) {
-      currentShortcutKey = key;
-      console.log('快捷键加载成功：', currentShortcutKey);
-    } else {
-      console.log('未获取到有效快捷键，使用默认 Q');
-    }
-  } catch (err) {
-    console.error('加载快捷键出错：', err);
-  }
-}
-
-// 页面加载时执行
-document.addEventListener('DOMContentLoaded', () => {
-  loadShortcutKey();
-});
-
-// 键盘监听
+// 固定快捷键：Q（单个键）
 document.addEventListener('keydown', (e) => {
   // 避免在输入框、搜索框等地方触发
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
     return;
   }
 
-  const pressedKey = e.key.toUpperCase();
-
-  if (pressedKey === currentShortcutKey) {
+  // 只判断是否按了 Q 或 q
+  if (e.key.toUpperCase() === 'Q') {
     e.preventDefault();
 
     const toggle = document.getElementById('sidebar-toggle');
