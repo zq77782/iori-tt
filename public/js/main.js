@@ -892,36 +892,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // 当前快捷键（从后台加载，默认为 Q）
-let currentShortcutKey = 'Q'; // 默认回退值
+let currentShortcutKey = 'Q'; // 默认值
 
-async function loadShortcutKey() {
+// 立即加载快捷键配置（不等 DOMContentLoaded）
+console.log('main.js 开始执行，尝试加载快捷键配置...');
+
+(async function loadShortcutImmediately() {
   try {
+    console.log('开始 fetch /api/settings');
     const res = await fetch('/api/settings');
-    console.log('fetch /api/settings 状态码：', res.status); // 调试1：状态码
+    console.log('fetch 状态码：', res.status);
 
     if (!res.ok) {
       throw new Error(`接口返回 ${res.status}`);
     }
 
     const data = await res.json();
-    console.log('从 /api/settings 读取到的完整数据：', data); // 调试2：完整 JSON
+    console.log('读取到的完整配置：', data);
 
     const savedKey = data.sidebar_shortcut;
     if (savedKey && typeof savedKey === 'string' && savedKey.trim().length > 0) {
       currentShortcutKey = savedKey.trim().toUpperCase();
-      console.log('成功应用快捷键：', currentShortcutKey); // 调试3：确认应用
+      console.log('成功应用快捷键：', currentShortcutKey);
     } else {
-      console.log('数据库无有效 sidebar_shortcut 值，使用默认 Q');
+      console.log('无有效 sidebar_shortcut，使用默认 Q');
     }
   } catch (err) {
     console.error('加载快捷键失败：', err);
   }
-}
-
-// 确保在页面加载时执行
-document.addEventListener('DOMContentLoaded', () => {
-  loadShortcutKey();
-});
+})();
 
   
   // ========== Random Wallpaper Logic (Client-side) ==========
